@@ -1,0 +1,212 @@
+[
+  {
+    "id": "q001",
+    "category": "校园信息",
+    "question": "北京大学有多少个学院",
+    "keywords": ["学院", "北京大学", "院系"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q002",
+    "category": "校园信息",
+    "question": "清华大学图书馆开放时间",
+    "keywords": ["图书馆", "开放时间", "清华大学"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q003",
+    "category": "校园信息",
+    "question": "浙江大学有几个校区",
+    "keywords": ["校区", "浙江大学"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q004",
+    "category": "食堂餐饮",
+    "question": "学生食堂今天的菜单是什么",
+    "keywords": ["食堂", "菜单", "餐饮"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q005",
+    "category": "食堂餐饮",
+    "question": "附近有什么好吃的推荐",
+    "keywords": ["餐厅", "推荐", "美食"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q006",
+    "category": "课程学习",
+    "question": "计算机科学的必修课有哪些",
+    "keywords": ["计算机", "必修课", "课程"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q007",
+    "category": "课程学习",
+    "question": "如何申请辅修专业",
+    "keywords": ["辅修", "申请", "专业"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q008",
+    "category": "考试相关",
+    "question": "期末考试时间安排",
+    "keywords": ["考试", "时间", "安排"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q009",
+    "category": "考试相关",
+    "question": "四六级报名什么时候开始",
+    "keywords": ["四六级", "报名", "英语"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q010",
+    "category": "考试相关",
+    "question": "补考政策是什么",
+    "keywords": ["补考", "政策"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q011",
+    "category": "社团活动",
+    "question": "有哪些学生社团可以加入",
+    "keywords": ["社团", "学生", "加入"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q012",
+    "category": "社团活动",
+    "question": "最近有什么校园活动",
+    "keywords": ["活动", "校园", "最近"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q013",
+    "category": "宿舍生活",
+    "question": "宿舍管理规定",
+    "keywords": ["宿舍", "管理", "规定"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q014",
+    "category": "宿舍生活",
+    "question": "宿舍晚上几点熄灯",
+    "keywords": ["熄灯", "宿舍", "时间"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q015",
+    "category": "生活服务",
+    "question": "校园一卡通怎么办",
+    "keywords": ["一卡通", "校园卡", "办理"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q016",
+    "category": "生活服务",
+    "question": "快递在哪里取",
+    "keywords": ["快递", "取件"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q017",
+    "category": "就业实习",
+    "question": "学校有哪些实习机会",
+    "keywords": ["实习", "就业", "机会"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q018",
+    "category": "就业实习",
+    "question": "毕业生就业率怎么样",
+    "keywords": ["就业率", "毕业生"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q019",
+    "category": "校园信息",
+    "question": "武汉大学的樱花什么时候开",
+    "keywords": ["樱花", "武汉大学", "开花"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q020",
+    "category": "生活服务",
+    "question": "校医院在哪里",
+    "keywords": ["校医院", "地址", "位置"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q021",
+    "category": "课程学习",
+    "question": "绩点怎么算的",
+    "keywords": ["绩点", "GPA", "计算"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q022",
+    "category": "考试相关",
+    "question": "考研需要准备什么",
+    "keywords": ["考研", "准备", "研究生"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q023",
+    "category": "生活服务",
+    "question": "学校WiFi密码是多少",
+    "keywords": ["WiFi", "网络", "密码"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q024",
+    "category": "校园信息",
+    "question": "复旦大学的优势学科是什么",
+    "keywords": ["复旦大学", "优势", "学科"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q025",
+    "category": "宿舍生活",
+    "question": "宿舍可以养宠物吗",
+    "keywords": ["宠物", "宿舍"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q026",
+    "category": "社团活动",
+    "question": "音乐社团怎么报名",
+    "keywords": ["音乐", "社团", "报名"],
+    "minRelevantDocs": 0
+  },
+  {
+    "id": "q027",
+    "category": "食堂餐饮",
+    "question": "食堂的营业时间",
+    "keywords": ["食堂", "营业时间", "开放"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q028",
+    "category": "生活服务",
+    "question": "怎么充值校园卡",
+    "keywords": ["充值", "校园卡"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q029",
+    "category": "课程学习",
+    "question": "选修课怎么选",
+    "keywords": ["选修课", "选课"],
+    "minRelevantDocs": 1
+  },
+  {
+    "id": "q030",
+    "category": "校园信息",
+    "question": "上海交通大学地址在哪里",
+    "keywords": ["上海交通大学", "地址"],
+    "minRelevantDocs": 1
+  }
+]

@@ -142,6 +142,21 @@ CREATE TABLE IF NOT EXISTS `conversation_log` (
     INDEX `idx_user_time` (`user_id`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI对话日志表';
 
+-- 异步RAG任务表
+CREATE TABLE IF NOT EXISTS `async_task` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `question` TEXT COMMENT '用户问题',
+    `session_id` VARCHAR(64) DEFAULT NULL COMMENT '会话ID',
+    `status` VARCHAR(20) DEFAULT 'PENDING' COMMENT 'PENDING/PROCESSING/COMPLETED/FAILED',
+    `answer` TEXT COMMENT 'AI回答',
+    `error_message` VARCHAR(500) DEFAULT NULL COMMENT '错误信息',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX `idx_user_id` (`user_id`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='异步RAG任务表';
+
 -- ==========================================
 -- 以下为 ALTER TABLE 语句（依赖应用已自动建表）
 -- 如遇错误可忽略，说明表尚未创建
