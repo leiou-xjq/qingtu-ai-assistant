@@ -408,7 +408,8 @@ public class RagController {
                 User user = userMapper.selectById(userId);
                 String username = user != null ? user.getUsername() : "user";
                 String token = jwtUtil.generateToken(userId, username);
-                String result = orchestratorAgent.process(question, "Bearer " + token, new HashMap<>());
+                String result = orchestratorAgent.process(question, "Bearer " + token, new HashMap<>(),
+                    sessionId != null ? String.valueOf(sessionId) : "");
                 log.info("Orchestrator返回: {}", result);
                 return result != null ? result : "处理完成";
             } catch (Exception e) {

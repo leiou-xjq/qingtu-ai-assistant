@@ -50,7 +50,7 @@ public class ChatSpecialistAgent {
     public String chatWithHistory(Long userId, String sessionId, String userMessage, UserContext context) {
         var user = userMapper.selectById(userId);
         String nickname = user != null && user.getNickname() != null ? user.getNickname() : "用户";
-        String school = context.getCity();
+        String school = context.getSchool();
         String city = context.getCity();
 
         List<RedisSessionManager.ChatMessage> history = getHistory(userId, sessionId);

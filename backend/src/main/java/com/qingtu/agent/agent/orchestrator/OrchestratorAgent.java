@@ -99,6 +99,7 @@ public class OrchestratorAgent {
         List<CompletableFuture<ResultMessage>> futures = new ArrayList<>();
 
         for (Task task : tasks) {
+            task.getParameters().put("sessionId", sessionId);
             CompletableFuture<ResultMessage> future = executeTaskAsync(task, context, files, correlationId);
             futures.add(future);
         }

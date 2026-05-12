@@ -10,6 +10,7 @@ import com.qingtu.agent.mapper.ChatMessageMapper;
 import com.qingtu.agent.mapper.ChatSessionMapper;
 import com.qingtu.agent.mapper.UserHealthMapper;
 import com.qingtu.agent.mapper.UserMapper;
+import com.qingtu.agent.rag.RagRetrievalService;
 import com.qingtu.agent.rag.RagServiceCore;
 import com.qingtu.agent.service.IRagService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.*;
 public class IRagServiceImpl implements IRagService {
 
     private final RagServiceCore ragServiceCore;
+    private final RagRetrievalService ragRetrievalService;
     private final QingTuAgent qingTuAgent;
     private final UserMapper userMapper;
     private final UserHealthMapper userHealthMapper;
@@ -32,15 +34,23 @@ public class IRagServiceImpl implements IRagService {
     @Override
     @Transactional
     public CommonResult<?> ask(Long userId, String question, Long sessionId) {
-        String context = ragServiceCore.retrieveCommonContext(question, 5);
+        RagRetrievalService.RetrievalResult retrieval = ragRetrievalService.retrieve(question, userId);
+        String context = retrieval.esContext();
         String userContext = buildUserContext(userId);
         String chatHistory = sessionId != null && sessionId > 0 ? buildChatHistory(sessionId) : "";
+        String chatSchool = extractSchoolFromChat(chatHistory);
 
         StringBuilder prompt = new StringBuilder();
 
-        // 用户档案（仅当与问题相关时）
-        if (!userContext.isEmpty()) {
-            prompt.append("用户档案：\n").append(userContext).append("\n");
+        // 用户档案（优先使用对话中检测到的学校，其次使用档案中的学校）
+        String effectiveUserContext;
+        if (chatSchool != null && !chatSchool.isEmpty()) {
+            effectiveUserContext = buildUserContext(userId, chatSchool);
+        } else {
+            effectiveUserContext = userContext;
+        }
+        if (!effectiveUserContext.isEmpty()) {
+            prompt.append("用户档案：\n").append(effectiveUserContext).append("\n");
         }
 
         // 对话历史（最近5轮）
@@ -150,13 +160,36 @@ public class IRagServiceImpl implements IRagService {
         return title;
     }
 
+    /**
+     * 从对话历史中提取最后讨论的学校名
+     * 匹配 "大学" 结尾的实体词作为候选学校
+     */
+    private String extractSchoolFromChat(String chatHistory) {
+        if (chatHistory == null || chatHistory.isEmpty()) {
+            return null;
+        }
+        java.util.regex.Matcher m = java.util.regex.Pattern
+            .compile("([\\u4e00-\\u9fa5]{2,8}(?:大学|学院))")
+            .matcher(chatHistory);
+        String lastSchool = null;
+        while (m.find()) {
+            lastSchool = m.group(1);
+        }
+        return lastSchool;
+    }
+
     private String buildUserContext(Long userId) {
+        return buildUserContext(userId, null);
+    }
+
+    private String buildUserContext(Long userId, String overrideSchool) {
         StringBuilder sb = new StringBuilder();
 
         User user = userMapper.selectById(userId);
         if (user != null) {
-            if (user.getSchool() != null && !user.getSchool().isEmpty()) {
-                sb.append("- 学校：").append(user.getSchool()).append("\n");
+            String school = overrideSchool != null ? overrideSchool : user.getSchool();
+            if (school != null && !school.isEmpty()) {
+                sb.append("- 学校：").append(school).append("\n");
             }
             if (user.getCity() != null && !user.getCity().isEmpty()) {
                 sb.append("- 城市：").append(user.getCity()).append("\n");
@@ -214,7 +247,8 @@ public class IRagServiceImpl implements IRagService {
 
     @Override
     public CommonResult<?> search(String query, String category, int topK) {
-        String context = ragServiceCore.retrieveCommonContext(query, topK);
+        RagRetrievalService.RetrievalResult retrieval = ragRetrievalService.retrieve(query, (String) null);
+        String context = retrieval.esContext();
         Map<String, Object> result = new HashMap<>();
         result.put("query", query);
         result.put("results", context);
