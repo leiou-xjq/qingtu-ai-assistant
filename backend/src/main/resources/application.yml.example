@@ -1,0 +1,269 @@
+# =============================================
+# 青途智伴AI生活助手 - 应用配置文件
+# 开发环境配置
+# =============================================
+
+spring:
+  application:
+    name: qingtu-ai-assistant
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/qingtu_assistant?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: ${DB_PASSWORD}
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 60000
+
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 1
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
+          max-wait: 5000ms
+
+  # Quartz定时任务配置
+  quartz:
+    job-store-type: memory
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: QingTuScheduler
+            instanceId: AUTO
+          threadPool:
+            threadCount: 10
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+  # Spring AI 配置（OpenAI兼容模式，通义千问）
+  ai:
+    openai:
+      api-key: ${SPRING_AI_API_KEY}
+      base-url: ${SPRING_AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode}
+      chat:
+        options:
+          model: ${SPRING_AI_MODEL:qwen-turbo}
+          temperature: 0.7
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.qingtu.agent.entity.po
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 服务器配置
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+  connection-timeout: 120000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+# 阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID}
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET}
+    bucket-name: qingtuzhiban
+
+# Elasticsearch配置
+elasticsearch:
+  host: localhost
+  port: 9200
+
+# RabbitMQ配置
+rabbitmq:
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  username: ${RABBITMQ_USERNAME:guest}
+  password: ${RABBITMQ_PASSWORD:guest}
+  virtual-host: /
+
+# Resilience4j限流配置
+resilience4j:
+  circuitbreaker:
+    instances:
+      aiProvider:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+  ratelimiter:
+    instances:
+      aiChat:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1m
+        timeoutDuration: 3s
+  timelimiter:
+    instances:
+      toolCall:
+        timeoutDuration: 3s
+      aiGenerate:
+        timeoutDuration: 30s
+
+# =============================================
+# 青途智伴自定义配置
+# =============================================
+
+# AI配置（阿里云百炼 Qwen）
+ai:
+  dashscope:
+    api-key: ${DASHSCOPE_API_KEY}
+    model: qwen-plus
+    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    timeout: 60000
+
+# 天气API配置（心知天气）
+weather:
+  api-key: ${WEATHER_API_KEY}
+  base-url: https://api.seniverse.com/v3
+  timeout: 10000
+
+# 学校搜索API配置（百度地图）
+school:
+  api-url: https://api.map.baidu.com/place/v2/search
+  ak: ${BAIDU_MAP_AK}
+  timeout: 10000
+
+# 定位API配置（腾讯地图）
+location:
+  qq-key: ${QQ_MAP_KEY}
+  api-url: https://apis.map.qq.com/ws/geocoder/v1
+  timeout: 10000
+
+# Webhook推送配置
+webhook:
+  dingtalk:
+    enabled: ${DINGTALK_ENABLED:false}
+    url: ${DINGTALK_WEBHOOK_URL:}
+    secret: ${DINGTALK_SECRET:}
+  workweixin:
+    enabled: ${WECHAT_WORK_ENABLED:false}
+    webhook-url: ${WECHAT_WORK_WEBHOOK_URL:}
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 604800000
+  header: Authorization
+  prefix: "Bearer "
+
+# 向量存储配置（Qdrant + 文件兜底）
+vector:
+  enabled: ${VECTOR_ENABLED:true}
+  qdrant:
+    host: ${QDRANT_HOST:localhost}
+    port: ${QDRANT_PORT:6333}
+    collection-name: qingtu-knowledge
+  persist-directory: ./data/chroma
+
+# 缓存配置（Caffeine）
+cache:
+  caffeine:
+    spec: maximumSize=1000,expireAfterWrite=3600s
+
+# uni-push 配置
+unipush:
+  appid: __UNI__7F2A308
+  appkey: ${UNIPUSH_APPKEY}
+  appsecret: ${UNIPUSH_APPSECRET}
+
+# 知识库配置
+knowledge:
+  wikipedia:
+    enabled: true
+    lang: zh
+
+# 爬虫配置
+crawler:
+  connect-timeout: 30000
+  read-timeout: 60000
+  max-retries: 3
+  user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  max-content-length: 1048576
+  concurrent-schools: 3
+  campus:
+    paths: /
+    selectors: "main, .intro, .about, .profile, .content"
+  announce:
+    paths: /news,/notice,/tzgg,/announcement
+    selectors: ".news-list, .article-list, .notice, .news, article"
+  canteen:
+    paths: /canteen,/dining,/食堂,/tsg
+    selectors: ".canteen, .food, .menu, .dishes"
+  course:
+    paths: /jw,/teaching,/course,/jiaowu
+    selectors: ".jw, .course, .teaching, .curriculum"
+  exam:
+    paths: /exam,/ks,/考试,/test
+    selectors: ".exam, .test-info, .examination"
+
+
+# 嵌入配置
+rag:
+  retrieval:
+    top-k: 5
+  expired-days: 90
+  school-keywords:
+    - 简介
+    - 概况
+    - 历史
+    - 校史
+    - 校历
+    - 作息
+    - 食堂
+    - 宿舍
+    - 图书馆
+    - 课程
+    - 考试
+    - 社团
+    - 就业
+    - 实习
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.qingtu.agent: DEBUG
+    com.qingtu.agent.tool: DEBUG
+    com.qingtu.agent.mcp: DEBUG
+    com.qingtu.agent.agent: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ./logs/qingtu-ai.log
+    max-size: 100MB
+    max-history: 30

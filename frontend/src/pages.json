@@ -1,0 +1,119 @@
+{
+  "pages": [
+    {
+      "path": "pages/auth/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/auth/register",
+      "style": {
+        "navigationBarTitleText": "注册",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "青途智伴",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/weather/index",
+      "style": {
+        "navigationBarTitleText": "天气穿搭"
+      }
+    },
+    {
+      "path": "pages/diet/index",
+      "style": {
+        "navigationBarTitleText": "健康饮食"
+      }
+    },
+    {
+      "path": "pages/cost/index",
+      "style": {
+        "navigationBarTitleText": "智能记账"
+      }
+    },
+    {
+      "path": "pages/course/index",
+      "style": {
+        "navigationBarTitleText": "课程管理"
+      }
+    },
+    {
+      "path": "pages/note/index",
+      "style": {
+        "navigationBarTitleText": "AI笔记"
+      }
+    },
+    {
+      "path": "pages/note/detail",
+      "style": {
+        "navigationBarTitleText": "笔记详情"
+      }
+    },
+    {
+      "path": "pages/chat/index",
+      "style": {
+        "navigationBarTitleText": "智能问答"
+      }
+    },
+    {
+      "path": "pages/notification/index",
+      "style": {
+        "navigationBarTitleText": "消息中心"
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/profile/edit",
+      "style": {
+        "navigationBarTitleText": "编辑资料"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "青途智伴",
+    "navigationBarBackgroundColor": "#F8FAFC",
+    "backgroundColor": "#F8FAFC"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#3B82F6",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/cost/index",
+        "text": "记账"
+      },
+      {
+        "pagePath": "pages/course/index",
+        "text": "课表"
+      },
+      {
+        "pagePath": "pages/chat/index",
+        "text": "问答"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  }
+}
