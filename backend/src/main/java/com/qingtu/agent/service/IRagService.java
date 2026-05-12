@@ -17,11 +17,11 @@ public interface IRagService {
 
     CommonResult<?> getSessionList(Long userId);
 
-    CommonResult<?> getSessionHistory(Long sessionId);
+    CommonResult<?> getSessionHistory(Long userId, Long sessionId);
 
     CommonResult<?> createSession(Long userId, String title);
 
-    CommonResult<?> deleteSession(Long sessionId);
+    CommonResult<?> deleteSession(Long userId, Long sessionId);
 
-    CommonResult<?> renameSession(Long sessionId, String newTitle);
+    CommonResult<?> renameSession(Long userId, Long sessionId, String newTitle);
 }

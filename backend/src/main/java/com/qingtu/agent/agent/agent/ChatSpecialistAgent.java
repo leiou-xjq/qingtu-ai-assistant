@@ -53,13 +53,13 @@ public class ChatSpecialistAgent {
         String school = context.getSchool();
         String city = context.getCity();
 
-        List<RedisSessionManager.ChatMessage> history = getHistory(userId, sessionId);
+        List<RedisSessionManager.ChatRecord> history = getHistory(userId, sessionId);
 
         String prompt = buildPrompt(nickname, school, city, history, userMessage);
         return qingTuAgent.chat(prompt);
     }
 
-    public List<RedisSessionManager.ChatMessage> getHistory(Long userId, String sessionId) {
+    public List<RedisSessionManager.ChatRecord> getHistory(Long userId, String sessionId) {
         try {
             if (sessionId != null && !sessionId.isBlank()) {
                 return redisSessionManager.getHistory(userId, sessionId);
@@ -70,7 +70,7 @@ public class ChatSpecialistAgent {
         return List.of();
     }
 
-    private String buildPrompt(String nickname, String school, String city, List<RedisSessionManager.ChatMessage> history, String userMessage) {
+    private String buildPrompt(String nickname, String school, String city, List<RedisSessionManager.ChatRecord> history, String userMessage) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("你是青途智伴，专为大学生打造的AI生活助手。你温暖、善解人意、充满正能量。\n\n");
 
@@ -82,7 +82,7 @@ public class ChatSpecialistAgent {
         if (!history.isEmpty()) {
             prompt.append("【对话历史】\n");
             int count = 0;
-            for (RedisSessionManager.ChatMessage msg : history) {
+            for (RedisSessionManager.ChatRecord msg : history) {
                 if (count >= MAX_HISTORY) break;
                 prompt.append("用户: ").append(msg.content()).append("\n");
                 prompt.append("AI: ").append(msg.role().equals("user") ? "[用户消息]" : msg.content()).append("\n\n");

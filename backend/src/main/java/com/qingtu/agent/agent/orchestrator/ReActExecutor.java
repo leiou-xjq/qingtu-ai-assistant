@@ -187,12 +187,12 @@ public class ReActExecutor {
     private String buildHistory(UserContext context, String sessionId) {
         if (sessionId == null || sessionId.isBlank()) return "";
         try {
-            List<RedisSessionManager.ChatMessage> history = redisSessionManager.getHistory(context.getUserId(), sessionId);
+            List<RedisSessionManager.ChatRecord> history = redisSessionManager.getHistory(context.getUserId(), sessionId);
             if (history.isEmpty()) return "";
 
             StringBuilder sb = new StringBuilder();
             int count = 0;
-            for (RedisSessionManager.ChatMessage msg : history) {
+            for (RedisSessionManager.ChatRecord msg : history) {
                 if (count >= MAX_HISTORY) break;
                 String role = msg.role().equals("user") ? "用户" : "AI";
                 sb.append(role).append(": ").append(msg.content()).append("\n");

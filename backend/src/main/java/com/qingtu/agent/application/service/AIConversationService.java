@@ -7,7 +7,7 @@ import com.qingtu.agent.common.Constants;
 import com.qingtu.agent.domain.tool.IntentClassifier;
 import com.qingtu.agent.domain.tool.IntentType;
 import com.qingtu.agent.infrastructure.redis.RedisSessionManager;
-import com.qingtu.agent.infrastructure.redis.RedisSessionManager.ChatMessage;
+import com.qingtu.agent.infrastructure.redis.RedisSessionManager.ChatRecord;
 import com.qingtu.agent.infrastructure.security.PromptSecurityFilter;
 import com.qingtu.agent.infrastructure.security.PromptSecurityFilter.SecurityCheckResult;
 import com.qingtu.agent.rag.RagServiceCore;
@@ -71,7 +71,7 @@ public class AIConversationService {
         sessionManager.appendMessage(userId, finalSessionId,
             RedisSessionManager.MessageRole.USER, userMessage);
 
-        List<ChatMessage> history = sessionManager.getHistory(userId, finalSessionId);
+        List<ChatRecord> history = sessionManager.getHistory(userId, finalSessionId);
 
         String ragContext = "";
         String skillContext = "";
@@ -125,22 +125,19 @@ public class AIConversationService {
     }
 
     private String buildPrompt(String userMessage, IntentType intent,
-                             String ragContext, List<ChatMessage> history) {
+                             String ragContext, List<ChatRecord> history) {
         StringBuilder prompt = new StringBuilder();
+        prompt.append("你是青途智伴AI助手，专为大学生设计。\n\n");
 
-        prompt.append("你是青途AI助手");
-        prompt.append("，当前意图类型：").append(intent.name()).append("\n");
-
-        if (!ragContext.isBlank()) {
-            prompt.append("\n【相关知识】\n").append(ragContext).append("\n");
+        if (!history.isEmpty()) {
+            prompt.append("【对话历史】\n");
+            for (ChatRecord msg : history) {
+                prompt.append(msg.role()).append(": ").append(msg.content()).append("\n");
+            }
+            prompt.append("\n");
         }
 
-        prompt.append("\n【对话历史】\n");
-        for (ChatMessage msg : history) {
-            prompt.append(msg.role()).append(": ").append(msg.content()).append("\n");
-        }
-
-        prompt.append("\n用户: ").append(userMessage).append("\n助手: ");
+        prompt.append("用户: ").append(userMessage).append("\n助手: ");
         return prompt.toString();
     }
 

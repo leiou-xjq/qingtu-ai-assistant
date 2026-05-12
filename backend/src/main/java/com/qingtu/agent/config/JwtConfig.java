@@ -1,8 +1,9 @@
 package com.qingtu.agent.config;
 
 import com.qingtu.agent.util.JwtUtil;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,9 +16,9 @@ import org.springframework.context.annotation.Configuration;
  * 
  * @author 青途智伴技术团队
  */
-@Data
+@Getter
+@Setter
 @Configuration
-@ConfigurationProperties(prefix = "jwt")
 public class JwtConfig {
 
     /**
@@ -27,7 +28,8 @@ public class JwtConfig {
      * - 生产环境必须替换为复杂密钥
      * - 建议使用至少256位的密钥
      */
-    private String secret = "qingtu-secret-key-change-in-production-2024";
+    @Value("${jwt.secret:qingtu-secret-key-change-in-production-2024}")
+    private String secret;
 
     /**
      * Token过期时间（毫秒）

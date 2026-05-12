@@ -275,10 +275,10 @@ public class IRagServiceImpl implements IRagService {
     }
 
     @Override
-    public CommonResult<?> getSessionHistory(Long sessionId) {
+    public CommonResult<?> getSessionHistory(Long userId, Long sessionId) {
         ChatSession session = chatSessionMapper.selectById(sessionId);
-        if (session == null) {
-            return CommonResult.success(new ArrayList<>());
+        if (session == null || !session.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
 
         List<ChatMessage> messages = chatMessageMapper.selectList(
@@ -316,10 +316,10 @@ public class IRagServiceImpl implements IRagService {
 
     @Override
     @Transactional
-    public CommonResult<?> deleteSession(Long sessionId) {
+    public CommonResult<?> deleteSession(Long userId, Long sessionId) {
         ChatSession session = chatSessionMapper.selectById(sessionId);
-        if (session == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND);
+        if (session == null || !session.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
 
         chatMessageMapper.delete(new LambdaQueryWrapper<ChatMessage>()
@@ -330,10 +330,10 @@ public class IRagServiceImpl implements IRagService {
     }
 
     @Override
-    public CommonResult<?> renameSession(Long sessionId, String newTitle) {
+    public CommonResult<?> renameSession(Long userId, Long sessionId, String newTitle) {
         ChatSession session = chatSessionMapper.selectById(sessionId);
-        if (session == null) {
-            return CommonResult.fail("会话不存在");
+        if (session == null || !session.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
 
         session.setTitle(newTitle);

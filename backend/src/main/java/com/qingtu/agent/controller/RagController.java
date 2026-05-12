@@ -5,7 +5,7 @@ import com.qingtu.agent.agent.orchestrator.OrchestratorAgent;
 import com.qingtu.agent.common.CommonResult;
 import com.qingtu.agent.entity.po.User;
 import com.qingtu.agent.infrastructure.redis.RedisSessionManager;
-import com.qingtu.agent.infrastructure.redis.RedisSessionManager.ChatMessage;
+import com.qingtu.agent.infrastructure.redis.RedisSessionManager.ChatRecord;
 import com.qingtu.agent.mapper.UserMapper;
 import com.qingtu.agent.mapper.ChatMessageMapper;
 import com.qingtu.agent.mapper.ChatSessionMapper;
@@ -64,8 +64,9 @@ public class RagController {
     }
 
     @GetMapping("/sessions/{sessionId}/history")
-    public CommonResult<?> getSessionHistory(@PathVariable Long sessionId) {
-        return ragService.getSessionHistory(sessionId);
+    public CommonResult<?> getSessionHistory(HttpServletRequest request, @PathVariable Long sessionId) {
+        Long userId = getUserIdFromRequest(request);
+        return ragService.getSessionHistory(userId, sessionId);
     }
 
     @PostMapping("/sessions")
@@ -76,14 +77,16 @@ public class RagController {
     }
 
     @DeleteMapping("/sessions/{sessionId}")
-    public CommonResult<?> deleteSession(@PathVariable Long sessionId) {
-        return ragService.deleteSession(sessionId);
+    public CommonResult<?> deleteSession(HttpServletRequest request, @PathVariable Long sessionId) {
+        Long userId = getUserIdFromRequest(request);
+        return ragService.deleteSession(userId, sessionId);
     }
 
     @PutMapping("/sessions/{sessionId}")
-    public CommonResult<?> renameSession(@PathVariable Long sessionId, @RequestBody Map<String, String> body) {
+    public CommonResult<?> renameSession(HttpServletRequest request, @PathVariable Long sessionId, @RequestBody Map<String, String> body) {
+        Long userId = getUserIdFromRequest(request);
         String title = body.get("title");
-        return ragService.renameSession(sessionId, title);
+        return ragService.renameSession(userId, sessionId, title);
     }
 
     @GetMapping("/search")
@@ -222,7 +225,7 @@ public class RagController {
         StringBuilder fullAnswer = new StringBuilder();
         return Mono.fromCallable(() -> {
             User user = userId != null ? userMapper.selectById(userId) : null;
-            List<ChatMessage> history = getHistory(userId, sessionId);
+            List<ChatRecord> history = getHistory(userId, sessionId);
             return buildConversationPrompt(intent, question, user, history);
         })
         .subscribeOn(Schedulers.boundedElastic())
@@ -233,17 +236,17 @@ public class RagController {
         ;
     }
 
-    private List<ChatMessage> getHistory(Long userId, Long sessionId) {
+    private List<ChatRecord> getHistory(Long userId, Long sessionId) {
         try {
             if (sessionId != null && userId != null) {
-                List<ChatMessage> h = redisSessionManager.getHistory(userId, sessionId.toString());
+                List<ChatRecord> h = redisSessionManager.getHistory(userId, sessionId.toString());
                 return h.size() > 10 ? h.subList(h.size() - 10, h.size()) : h;
             }
         } catch (Exception ignored) {}
         return new ArrayList<>();
     }
 
-    private String buildConversationPrompt(String intent, String question, User user, List<ChatMessage> history) {
+    private String buildConversationPrompt(String intent, String question, User user, List<ChatRecord> history) {
         StringBuilder p = new StringBuilder();
         p.append("你是青途智伴，专为大学生打造的AI生活助手。你温暖、善解人意、充满正能量。\n\n");
 
@@ -256,7 +259,7 @@ public class RagController {
 
         if (!history.isEmpty()) {
             p.append("对话历史：\n");
-            for (ChatMessage m : history) p.append(m.role()).append(": ").append(m.content()).append("\n");
+            for (ChatRecord m : history) p.append(m.role()).append(": ").append(m.content()).append("\n");
             p.append("\n");
         }
 
