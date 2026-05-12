@@ -72,12 +72,15 @@ public class OrchestratorAgent {
 
         List<Task> tasks = intentAnalyzer.analyze(message, context, files);
         log.debug("意图分析结果: 共{}个任务", tasks.size());
-        for (Task task : tasks) {
-            log.debug("  Task: agent={}, action={}, params={}", task.getAgent(), task.getAction(), task.getParameters());
-        }
 
         if (tasks.isEmpty()) {
-            return "无法理解您的请求，请重新描述";
+            log.info("意图分析无结果，尝试ReAct推理模式");
+            try {
+                return reActExecutor.execute(message, context, sessionId, files);
+            } catch (Exception e) {
+                log.warn("ReAct执行失败，返回兜底: {}", e.getMessage());
+                return "抱歉，我暂时无法理解您的问题，请换个说法试试？";
+            }
         }
 
         if (tasks.size() == 1) {
@@ -131,6 +134,8 @@ public class OrchestratorAgent {
         message.setFiles(files);
 
         pendingResults.put(task.getTaskId(), future);
+
+        messagePublisher.publish(message);
 
         executor.submit(() -> {
             try {
