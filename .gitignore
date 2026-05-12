@@ -5,8 +5,12 @@ backend/target/
 *.war
 
 # Node.js / npm
+node_modules/
+dist/
 frontend/node_modules/
 frontend/dist/
+web/node_modules/
+web/dist/
 
 # Logs
 *.log
@@ -33,5 +37,5 @@ backend/data/chroma/
 .DS_Store
 Thumbs.db
 
-# Temporary SQL files (根目录下的)
-*.sql
+# Temporary SQL files (仅根目录)
+/*.sql

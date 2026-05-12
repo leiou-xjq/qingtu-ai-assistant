@@ -3,22 +3,23 @@
 > 面向大学生全场景全自动AI生活助手
 
 [![GitHub stars](https://img.shields.io/github/stars/leiou-xjq/qingtu-ai-assistant)](https://github.com/leiou-xjq/qingtu-ai-assistant/stargazers)
-[![GitHub license](https://img.shields.io/github/license/leiou-xjq/qingtu-ai-assistant)](https://github.com/leiou-xjq/qingtu-ai-assistant/blob/main/LICENSE)
-[![Java Version](https://img.shields.io/badge/Java-17%2B-green)](https://adoptium.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen)](https://spring.io/projects/spring-boot)
+[![CI](https://github.com/leiou-xjq/qingtu-ai-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/leiou-xjq/qingtu-ai-assistant/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java 17](https://img.shields.io/badge/Java-17%2B-green)](https://adoptium.net/)
+[![Spring Boot 3.2.5](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen)](https://spring.io/projects/spring-boot)
 
 ## 项目简介
 
-青途智伴是一款专为大学生设计的AI生活助手，集成 **AI Agent**、**MCP多组件协同**、**Skill可插拔技能**、**RAG检索增强**、**向量数据库**、**Quartz全自动定时任务**，全流程无人干预自动运行。
+青途智伴是一款专为大学生设计的AI生活助手，采用 **多智能体协同** + **MCP工具调度** + **RAG检索增强** + **Quartz自动定时任务** 架构，覆盖天气穿搭、课程管理、智能记账、AI笔记等校园生活场景。
 
 ### 核心特性
 
-- 🤖 **多智能体协同** - 意图分析 + 专家智能体 + 任务编排
-- 🔄 **MCP 协议** - 统一调度中心，标准化工具调用
-- 📚 **RAG 知识增强** - 私有知识库检索，减少 AI 幻觉
-- ⏰ **全自动定时任务** - 早安推送、课前提醒、笔记生成、报告汇总
+- 🤖 **AI 对话** - 接入通义千问/豆包大模型，支持多轮对话
+- 🔄 **MCP 调度** - 统一工具调度中心，标准化工具注册与调用
+- 📚 **RAG 知识增强** - 私有知识库语义检索，减少 AI 幻觉
+- ⏰ **全自动定时任务** - Quartz 驱动早安推送、课前提醒、笔记生成
 - 🔧 **技能可插拔** - 8个独立技能模块，动态启用/禁用
-- 📱 **多端适配** - 微信小程序 + H5 + APP
+- 📱 **多端适配** - 微信小程序 + H5 双端运行
 
 ## 核心功能
 
@@ -30,7 +31,7 @@
 - 未读消息提醒
 
 ### ☀️ 天气穿搭
-- 实时天气查询（和风天气API）
+- 实时天气查询（心知天气 API）
 - AI个性化穿搭建议
 - 7日天气预报
 - 每日早安自动推送
@@ -92,7 +93,7 @@
 ### 后端
 - **框架**: SpringBoot 3.2.5
 - **ORM**: MyBatis-Plus 3.5.6
-- **AI**: LangChain4j + 通义千问 (DashScope)
+- **AI**: 通义千问 (DashScope) + 豆包 (Doubao)
 - **定时任务**: Quartz
 - **向量库**: Chroma (内嵌) + Elasticsearch
 - **缓存**: Caffeine + Redis
@@ -111,9 +112,8 @@
 ### 1. 环境要求
 - JDK 17+
 - Node.js 18+
-- MySQL 8.0+
-- Redis
 - Maven 3.8+
+- Docker & Docker Compose（推荐）
 
 ### 2. 克隆项目
 ```bash
@@ -121,52 +121,34 @@ git clone https://github.com/leiou-xjq/qingtu-ai-assistant.git
 cd qingtu-ai-assistant
 ```
 
-### 3. 配置环境变量
+### 3. 一键启动依赖（Docker Compose）
 ```bash
-# 在项目根目录创建 .env 文件
-cp .env.example .env  # 或手动创建
-
-# 编辑 .env 文件，填入你的配置
-notepad .env
+# 启动 MySQL + Redis（自动初始化数据库）
+docker-compose up -d
 ```
 
-### 4. 初始化数据库
-```sql
--- 登录 MySQL
-mysql -u root -p
-
--- 创建数据库
-CREATE DATABASE qingtu_assistant DEFAULT CHARSET utf8mb4;
-
--- 退出后执行 SQL 脚本 (backend/sql/ 目录下)
-mysql -u root -p qingtu_assistant < backend/sql/agent_tables.sql
-mysql -u root -p qingtu_assistant < backend/sql/conversation_log.sql
-mysql -u root -p qingtu_assistant < backend/sql/mcp_audit_log.sql
-mysql -u root -p qingtu_assistant < backend/sql/rag_crawler.sql
-mysql -u root -p qingtu_assistant < backend/sql/parse_job.sql
-mysql -u root -p qingtu_assistant < backend/sql/optimize_index.sql
--- 如有其他 SQL 文件，按需执行
+### 4. 配置环境变量
+```bash
+# 复制环境变量模板，填入你的 API Key
+cp .env.example .env
+# 编辑 .env 填入实际配置
 ```
 
 ### 5. 后端启动
 ```bash
 cd backend
 
-# 使用 Maven 构建
-mvn clean package -DskipTests
+# 复制配置文件
+cp src/main/resources/application.yml.example src/main/resources/application.yml
 
-# 启动应用 (确保已配置环境变量)
-java -jar target/qingtu-ai-assistant-1.0.0.jar
-
-# 或开发模式运行
+# 启动应用
 mvn spring-boot:run
 ```
+> 应用启动后访问：http://localhost:8080/api
 
 ### 6. 前端启动
 ```bash
 cd frontend
-
-# 安装依赖
 npm install
 
 # H5开发模式
@@ -176,15 +158,10 @@ npm run dev:h5
 npm run dev:mp-weixin
 ```
 
-### 7. Web H5 启动
+### 7. 手动数据库初始化（不使用 Docker 时）
 ```bash
-cd web
-
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
+# 创建数据库并执行初始化脚本
+mysql -u root -p < backend/sql/init.sql
 ```
 
 ## 配置说明
@@ -202,7 +179,12 @@ cp .env.example .env  # 如有 .env.example
 ```
 
 ### 2. 环境变量 (.env)
-在项目根目录创建 `.env` 文件，配置以下内容：
+复制 `.env.example` 为 `.env`，并填入实际配置：
+
+```bash
+cp .env.example .env
+# 编辑 .env 填入你的 API Key
+```
 
 ```env
 # 数据库
@@ -269,70 +251,59 @@ $env:WEATHER_API_KEY="your_weather_key"
 
 ```
 qingtu-ai-assistant/
-├── .gitignore              # Git忽略配置
-├── .env                    # 本地环境变量 (不提交)
+├── .gitignore               # Git忽略配置
+├── .env.example             # 环境变量模板
+├── docker-compose.yml       # Docker 一键启动
+├── LICENSE                  # MIT 许可证
 ├── README.md
 │
-├── backend/                # Spring Boot 后端
+├── .github/workflows/       # GitHub Actions CI
+│   └── ci.yml
+│
+├── backend/                 # Spring Boot 后端
 │   ├── src/main/java/com/qingtu/agent/
-│   │   ├── agent/          # AI Agent 模块
-│   │   │   ├── agent/      # 专家智能体 (Weather, Course, Chat...)
-│   │   │   ├── context/    # 用户上下文
-│   │   │   ├── message/    # 消息处理
+│   │   ├── agent/           # AI Agent 模块
+│   │   │   ├── agent/       # 专家智能体 (Weather, Course, Chat...)
+│   │   │   ├── context/     # 用户上下文
+│   │   │   ├── message/     # 消息处理
 │   │   │   ├── orchestrator/ # 意图分析与任务编排
-│   │   │   └── fallback/   # 降级处理
-│   │   ├── mcp/            # MCP 调度中心
-│   │   │   └── server/     # MCP Server 实现
-│   │   ├── config/         # 配置类
-│   │   ├── controller/     # REST API 接口
-│   │   ├── service/        # 业务逻辑层
-│   │   │   └── impl/       # 业务实现
-│   │   ├── entity/         # 实体类
-│   │   │   ├── dto/        # 数据传输对象
-│   │   │   ├── po/         # 持久化对象
-│   │   │   └── vo/         # 视图对象
-│   │   ├── mapper/         # MyBatis 数据访问层
-│   │   ├── rag/            # RAG 检索增强生成
-│   │   ├── task/           # Quartz 定时任务
-│   │   ├── tool/           # 工具类 (Weather, WebSearch...)
-│   │   ├── util/           # 工具类
-│   │   └── exception/      # 异常处理
+│   │   │   └── fallback/    # 降级处理
+│   │   ├── mcp/             # MCP 调度中心
+│   │   │   └── server/      # MCP Server 实现
+│   │   ├── config/          # 配置类
+│   │   ├── controller/      # REST API 接口
+│   │   ├── service/         # 业务逻辑层
+│   │   │   └── impl/        # 业务实现
+│   │   ├── entity/          # 实体类 (dto/po/vo)
+│   │   ├── mapper/          # MyBatis 数据访问层
+│   │   ├── rag/             # RAG 检索增强生成
+│   │   ├── task/            # Quartz 定时任务
+│   │   ├── tool/            # 工具 (Weather, WebSearch...)
+│   │   ├── util/            # 工具类
+│   │   └── exception/       # 异常处理
 │   ├── src/main/resources/
 │   │   ├── application.yml.example  # 配置模板
-│   │   └── schools.json    # 学校数据
+│   │   └── schools.json     # 学校数据
+│   ├── sql/
+│   │   └── init.sql         # 数据库初始化脚本
 │   └── pom.xml
 │
-├── frontend/               # UniApp 微信小程序
+├── frontend/                # UniApp 微信小程序
 │   ├── src/
-│   │   ├── api/            # API 封装
-│   │   ├── pages/          # 页面
-│   │   │   ├── auth/       # 认证页面
-│   │   │   ├── chat/       # AI 聊天
-│   │   │   ├── cost/       # 记账
-│   │   │   ├── course/     # 课程
-│   │   │   ├── diet/       # 饮食
-│   │   │   ├── index/      # 首页
-│   │   │   ├── note/       # 笔记
-│   │   │   ├── notification/ # 通知
-│   │   │   ├── profile/    # 个人中心
-│   │   │   └── weather/    # 天气
-│   │   ├── stores/         # Pinia 状态管理
-│   │   ├── styles/         # 样式
-│   │   └── utils/          # 工具函数
-│   ├── pages.json          # 页面路由配置
-│   ├── manifest.json        # 应用配置
+│   │   ├── api/             # API 封装
+│   │   ├── pages/           # 页面
+│   │   ├── stores/          # Pinia 状态管理
+│   │   ├── styles/          # 样式
+│   │   └── utils/           # 工具函数
+│   ├── pages.json           # 页面路由配置
 │   ├── package.json
 │   └── vite.config.js
 │
-├── web/                    # Web H5 版本
-│   ├── src/
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-│
-└── docs/                   # 文档目录
-    ├── DEPLOY.md           # 部署文档
-    └── 技术文档.md
+└── web/                     # Web H5 版本
+    ├── src/
+    ├── index.html
+    ├── package.json
+    └── vite.config.js
 ```
 
 ## API接口
@@ -352,26 +323,21 @@ qingtu-ai-assistant/
 
 ## 核心亮点
 
-### 1. MCP多组件协同调度
-- 统一调度定时任务、Agent、RAG、Skill
-- 任务编排与依赖管理
-- 异常兜底与降级处理
+### 1. 多智能体协同
+- 基于 MCP 服务调度实现意图分析 + 专家智能体 + 任务编排
+- 8个独立技能模块，统一接口设计，支持动态启用/禁用
 
-### 2. Skill可插拔技能体系
-- 8个独立技能模块
-- 统一接口设计
-- 支持动态启用/禁用
+### 2. RAG 知识增强
+- Elasticsearch + Chroma 向量数据库，语义相似度检索
+- 校园私有知识库，有效减少 AI 幻觉
 
-### 3. RAG+向量数据库
-- 校园私有知识库
-- 语义相似度检索
-- 减少AI幻觉
+### 3. 全自动 Quartz 定时任务
+- 每日早安天气推送、课前15分钟提醒
+- 下课 AI 笔记自动生成、月度消费报告汇总
 
-### 4. 全自动Quartz定时任务
-- 早安天气推送
-- 课前提醒
-- 下课笔记生成
-- 月度消费报告
+### 4. Redis 分布式锁
+- 基于 setIfAbsent 实现分布式锁，解决集群定时任务重复执行
+- Caffeine 本地缓存 + Redis 分布式缓存，加速热点数据访问
 
 ## 数据库表
 

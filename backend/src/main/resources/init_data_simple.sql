@@ -1,0 +1,12 @@
+INSERT INTO user (username, password, phone, nickname, city, status) VALUES ('admin', 'e10adc3949ba59abbe56e057f20f883e', '13800138000', 'admin', '北京', 1);
+INSERT INTO user (username, password, phone, nickname, city, status) VALUES ('test', 'e10adc3949ba59abbe56e057f20f883e', '13900139000', 'test', '上海', 1);
+INSERT INTO user_health (user_id, height, weight, bmi, age, gender, diet_goal, daily_calories) VALUES (1, 175.0, 70.0, 22.86, 20, 'M', 'balance', 2000);
+INSERT INTO user_health (user_id, height, weight, bmi, age, gender, diet_goal, daily_calories) VALUES (2, 165.0, 55.0, 20.20, 19, 'F', 'balance', 1600);
+INSERT INTO user_skill_config (user_id, skill_key, skill_name, enabled) VALUES (1, 'weather', '天气查询', 1);
+INSERT INTO user_skill_config (user_id, skill_key, skill_name, enabled) VALUES (1, 'outfit', '穿搭建议', 1);
+INSERT INTO user_skill_config (user_id, skill_key, skill_name, enabled) VALUES (1, 'diet', '饮食推荐', 1);
+INSERT INTO sys_task_config (task_key, task_name, task_group, cron_expression, enabled, description) VALUES ('morningPush', '每日早安推送', 'PUSH', '0 30 7 * * ?', 1, '每日7:30推送');
+INSERT INTO course_schedule (user_id, name, teacher, weekday, start_time, end_time, course_type, semester) VALUES (1, '高等数学', '张老师', 1, '08:00:00', '09:40:00', 'required', '2024春');
+INSERT INTO sys_notification (user_id, type, title, content, status) VALUES (1, 'system', '欢迎', '欢迎使用青途智伴！', 0);
+INSERT INTO canteen_dish (name, type, category, calories, protein, price, canteen, status) VALUES ('紫薯粥', 'breakfast', '主食', 120, 2, 2.00, '一食堂', 1);
+INSERT INTO canteen_dish (name, type, category, calories, protein, price, canteen, status) VALUES ('红烧肉', 'lunch', '肉类', 380, 18, 12.00, '一食堂', 1);
