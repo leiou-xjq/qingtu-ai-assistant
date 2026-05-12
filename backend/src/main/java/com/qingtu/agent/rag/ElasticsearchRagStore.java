@@ -153,43 +153,48 @@ public class ElasticsearchRagStore {
             throw new RuntimeException("Embedding生成失败，无法执行向量检索");
         }
 
-        List<Double> queryVector = new ArrayList<>(embedding.length);
+        List<Float> queryVector = new ArrayList<>(embedding.length);
         for (float v : embedding) {
-            queryVector.add((double) v);
+            queryVector.add(v);
         }
 
-        SearchRequest.Builder builder = new SearchRequest.Builder()
-            .index(INDEX_NAME)
-            .size(topK)
-            .knn(k -> k
-                .field("embedding")
-                .queryVector(queryVector)
-                .k(topK)
-                .numCandidates(topK * 2)
-            );
+        try {
+            SearchRequest.Builder builder = new SearchRequest.Builder()
+                .index(INDEX_NAME)
+                .size(topK)
+                .knn(k -> k
+                    .field("embedding")
+                    .queryVector(queryVector)
+                    .k(topK)
+                    .numCandidates(topK * 2)
+                );
 
-        if (school != null && !school.isEmpty() && !"common".equals(school)) {
-            builder.postFilter(f -> f.term(t -> t.field("school").value(school)));
-        } else if ("common".equals(school)) {
-            builder.query(q -> q.bool(b -> b
-                .should(s1 -> s1.term(t -> t.field("school").value("")))
-                .should(s2 -> s2.term(t -> t.field("school").value("common")))
-                .minimumShouldMatch("1")
-            ));
-        }
-
-        SearchResponse<Map> response = esClient.search(builder.build(), Map.class);
-
-        List<Map<String, Object>> results = new ArrayList<>();
-        for (Hit<Map> hit : response.hits().hits()) {
-            if (hit.source() != null) {
-                results.add(hit.source());
+            if (school != null && !school.isEmpty() && !"common".equals(school)) {
+                builder.postFilter(f -> f.term(t -> t.field("school").value(school)));
+            } else if ("common".equals(school)) {
+                builder.query(q -> q.bool(b -> b
+                    .should(s1 -> s1.term(t -> t.field("school").value("")))
+                    .should(s2 -> s2.term(t -> t.field("school").value("common")))
+                    .minimumShouldMatch("1")
+                ));
             }
-        }
 
-        log.debug("向量检索完成: query={}, school={}, topK={}, results={}",
-            query, school, topK, results.size());
-        return results;
+            SearchResponse<Map> response = esClient.search(builder.build(), Map.class);
+
+            List<Map<String, Object>> results = new ArrayList<>();
+            for (Hit<Map> hit : response.hits().hits()) {
+                if (hit.source() != null) {
+                    results.add(hit.source());
+                }
+            }
+
+            log.debug("向量检索完成: query={}, school={}, topK={}, results={}",
+                query, school, topK, results.size());
+            return results;
+
+        } catch (Exception e) {
+            throw new RuntimeException("ES向量检索失败: " + e.getMessage(), e);
+        }
     }
 
     private List<Map<String, Object>> textSearch(String keyword, String school, int topK) {
