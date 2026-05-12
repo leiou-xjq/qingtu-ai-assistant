@@ -2,9 +2,23 @@
 
 > 面向大学生全场景全自动AI生活助手
 
+[![GitHub stars](https://img.shields.io/github/stars/leiou-xjq/qingtu-ai-assistant)](https://github.com/leiou-xjq/qingtu-ai-assistant/stargazers)
+[![GitHub license](https://img.shields.io/github/license/leiou-xjq/qingtu-ai-assistant)](https://github.com/leiou-xjq/qingtu-ai-assistant/blob/main/LICENSE)
+[![Java Version](https://img.shields.io/badge/Java-17%2B-green)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen)](https://spring.io/projects/spring-boot)
+
 ## 项目简介
 
-青途智伴是一款专为大学生设计的AI生活助手，集成AI Agent、MCP多组件协同、Skill可插拔技能、RAG检索增强、向量数据库、Quartz全自动定时任务，全流程无人干预自动运行。
+青途智伴是一款专为大学生设计的AI生活助手，集成 **AI Agent**、**MCP多组件协同**、**Skill可插拔技能**、**RAG检索增强**、**向量数据库**、**Quartz全自动定时任务**，全流程无人干预自动运行。
+
+### 核心特性
+
+- 🤖 **多智能体协同** - 意图分析 + 专家智能体 + 任务编排
+- 🔄 **MCP 协议** - 统一调度中心，标准化工具调用
+- 📚 **RAG 知识增强** - 私有知识库检索，减少 AI 幻觉
+- ⏰ **全自动定时任务** - 早安推送、课前提醒、笔记生成、报告汇总
+- 🔧 **技能可插拔** - 8个独立技能模块，动态启用/禁用
+- 📱 **多端适配** - 微信小程序 + H5 + APP
 
 ## 核心功能
 
@@ -55,15 +69,34 @@
 - 已读/未读状态
 - 分类筛选
 
+## 技术架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        微信小程序 / H5                        │
+├─────────────────────────────────────────────────────────────┤
+│                        UniApp (Vue3)                        │
+├─────────────────────────────────────────────────────────────┤
+│                      Spring Boot 3.2.5                       │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐         │
+│  │  Agent  │ │   MCP   │ │  Skill  │ │   RAG   │         │
+│  │  多智能体 │ │ 调度中心  │ │ 技能系统  │ │ 知识检索  │         │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘         │
+├─────────────────────────────────────────────────────────────┤
+│  Quartz │ Redis │ MySQL │ Elasticsearch │ Chroma          │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## 技术栈
 
 ### 后端
 - **框架**: SpringBoot 3.2.5
 - **ORM**: MyBatis-Plus 3.5.6
-- **AI**: LangChain4j + 通义千问
+- **AI**: LangChain4j + 通义千问 (DashScope)
 - **定时任务**: Quartz
-- **向量库**: Chroma (内嵌)
+- **向量库**: Chroma (内嵌) + Elasticsearch
 - **缓存**: Caffeine + Redis
+- **消息队列**: RabbitMQ
 - **数据库**: MySQL 8.0
 
 ### 前端
@@ -80,23 +113,56 @@
 - Node.js 18+
 - MySQL 8.0+
 - Redis
+- Maven 3.8+
 
-### 2. 后端启动
+### 2. 克隆项目
+```bash
+git clone https://github.com/leiou-xjq/qingtu-ai-assistant.git
+cd qingtu-ai-assistant
+```
+
+### 3. 配置环境变量
+```bash
+# 在项目根目录创建 .env 文件
+cp .env.example .env  # 或手动创建
+
+# 编辑 .env 文件，填入你的配置
+notepad .env
+```
+
+### 4. 初始化数据库
+```sql
+-- 登录 MySQL
+mysql -u root -p
+
+-- 创建数据库
+CREATE DATABASE qingtu_assistant DEFAULT CHARSET utf8mb4;
+
+-- 退出后执行 SQL 脚本 (backend/sql/ 目录下)
+mysql -u root -p qingtu_assistant < backend/sql/agent_tables.sql
+mysql -u root -p qingtu_assistant < backend/sql/conversation_log.sql
+mysql -u root -p qingtu_assistant < backend/sql/mcp_audit_log.sql
+mysql -u root -p qingtu_assistant < backend/sql/rag_crawler.sql
+mysql -u root -p qingtu_assistant < backend/sql/parse_job.sql
+mysql -u root -p qingtu_assistant < backend/sql/optimize_index.sql
+-- 如有其他 SQL 文件，按需执行
+```
+
+### 5. 后端启动
 ```bash
 cd backend
 
-# 修改配置文件
-# 编辑 src/main/resources/application.yml
-# 配置数据库、Redis、API Key
-
-# 构建项目
+# 使用 Maven 构建
 mvn clean package -DskipTests
 
-# 启动应用
+# 启动应用 (确保已配置环境变量)
 java -jar target/qingtu-ai-assistant-1.0.0.jar
+
+# 或开发模式运行
+mvn spring-boot:run
 ```
 
-### 3. 前端启动
+### 6. 前端启动
 ```bash
 cd frontend
 
@@ -106,83 +172,167 @@ npm install
 # H5开发模式
 npm run dev:h5
 
-# 微信小程序
+# 微信小程序 (需安装微信开发者工具)
 npm run dev:mp-weixin
 ```
 
-### 4. 导入数据库
-```sql
--- 创建数据库
-CREATE DATABASE qingtu_assistant DEFAULT CHARSET utf8mb4;
+### 7. Web H5 启动
+```bash
+cd web
 
--- 执行SQL脚本
-mysql -u root -p qingtu_assistant < src/main/resources/schema.sql
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
 ```
 
 ## 配置说明
 
-### application.yml
+### 1. 配置文件模板
+项目使用 `application.yml.example` 作为配置模板，敏感信息通过环境变量管理。
+
+```bash
+# 复制配置文件模板
+cp backend/src/main/resources/application.yml.example \
+   backend/src/main/resources/application.yml
+
+# 复制环境变量模板
+cp .env.example .env  # 如有 .env.example
+```
+
+### 2. 环境变量 (.env)
+在项目根目录创建 `.env` 文件，配置以下内容：
+
+```env
+# 数据库
+DB_PASSWORD=your_db_password
+
+# Spring AI (阿里云百炼)
+SPRING_AI_API_KEY=your_dashscope_api_key
+SPRING_AI_MODEL=qwen-turbo
+
+# 阿里云 OSS
+ALIYUN_OSS_ACCESS_KEY_ID=your_access_key
+ALIYUN_OSS_ACCESS_KEY_SECRET=your_secret_key
+
+# 天气 API
+WEATHER_API_KEY=your_weather_api_key
+
+# 地图 API
+BAIDU_MAP_AK=your_baidu_map_ak
+QQ_MAP_KEY=your_qq_map_key
+
+# JWT
+JWT_SECRET=your_jwt_secret
+
+# UniPush
+UNIPUSH_APPKEY=your_unipush_appkey
+UNIPUSH_APPSECRET=your_unipush_appsecret
+```
+
+> **注意**: `.env` 文件包含敏感信息，已加入 `.gitignore`，不会提交到版本库。
+
+### 3. application.yml
 ```yaml
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/qingtu_assistant
     username: root
-    password: your_password
+    password: ${DB_PASSWORD}  # 从环境变量读取
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
-# AI配置
+# AI配置 (使用环境变量)
 ai:
   dashscope:
-    api-key: your_dashscope_api_key
-
-# 天气配置  
-weather:
-  api-key: your_hefeng_api_key
+    api-key: ${DASHSCOPE_API_KEY}
 ```
 
-### 环境变量
+### 4. 环境变量 (Linux/Mac)
 ```bash
 export DB_PASSWORD=your_db_password
 export DASHSCOPE_API_KEY=your_api_key
-export HEFENG_API_KEY=your_weather_key
+export WEATHER_API_KEY=your_weather_key
+```
+
+### 5. 环境变量 (Windows PowerShell)
+```powershell
+$env:DB_PASSWORD="your_db_password"
+$env:DASHSCOPE_API_KEY="your_api_key"
+$env:WEATHER_API_KEY="your_weather_key"
 ```
 
 ## 项目结构
 
 ```
 qingtu-ai-assistant/
-├── backend/
+├── .gitignore              # Git忽略配置
+├── .env                    # 本地环境变量 (不提交)
+├── README.md
+│
+├── backend/                # Spring Boot 后端
 │   ├── src/main/java/com/qingtu/agent/
-│   │   ├── config/          # 配置类
-│   │   ├── controller/     # REST接口
-│   │   ├── service/        # 业务层
+│   │   ├── agent/          # AI Agent 模块
+│   │   │   ├── agent/      # 专家智能体 (Weather, Course, Chat...)
+│   │   │   ├── context/    # 用户上下文
+│   │   │   ├── message/    # 消息处理
+│   │   │   ├── orchestrator/ # 意图分析与任务编排
+│   │   │   └── fallback/   # 降级处理
+│   │   ├── mcp/            # MCP 调度中心
+│   │   │   └── server/     # MCP Server 实现
+│   │   ├── config/         # 配置类
+│   │   ├── controller/     # REST API 接口
+│   │   ├── service/        # 业务逻辑层
+│   │   │   └── impl/       # 业务实现
 │   │   ├── entity/         # 实体类
-│   │   ├── mapper/         # 数据访问层
-│   │   ├── agent/          # AI Agent
-│   │   ├── mcp/            # MCP调度中心
-│   │   ├── skill/          # Skill技能
-│   │   ├── rag/            # RAG服务
-│   │   ├── task/           # Quartz任务
+│   │   │   ├── dto/        # 数据传输对象
+│   │   │   ├── po/         # 持久化对象
+│   │   │   └── vo/         # 视图对象
+│   │   ├── mapper/         # MyBatis 数据访问层
+│   │   ├── rag/            # RAG 检索增强生成
+│   │   ├── task/           # Quartz 定时任务
+│   │   ├── tool/           # 工具类 (Weather, WebSearch...)
 │   │   ├── util/           # 工具类
 │   │   └── exception/      # 异常处理
-│   └── src/main/resources/
-│       ├── application.yml
-│       └── schema.sql
+│   ├── src/main/resources/
+│   │   ├── application.yml.example  # 配置模板
+│   │   └── schools.json    # 学校数据
+│   └── pom.xml
 │
-├── frontend/
+├── frontend/               # UniApp 微信小程序
 │   ├── src/
-│   │   ├── api/            # API封装
-│   │   ├── components/     # 公共组件
-│   │   ├── pages/         # 页面
-│   │   ├── stores/         # Pinia状态
-│   │   └── utils/         # 工具
-│   └── pages.json
+│   │   ├── api/            # API 封装
+│   │   ├── pages/          # 页面
+│   │   │   ├── auth/       # 认证页面
+│   │   │   ├── chat/       # AI 聊天
+│   │   │   ├── cost/       # 记账
+│   │   │   ├── course/     # 课程
+│   │   │   ├── diet/       # 饮食
+│   │   │   ├── index/      # 首页
+│   │   │   ├── note/       # 笔记
+│   │   │   ├── notification/ # 通知
+│   │   │   ├── profile/    # 个人中心
+│   │   │   └── weather/    # 天气
+│   │   ├── stores/         # Pinia 状态管理
+│   │   ├── styles/         # 样式
+│   │   └── utils/          # 工具函数
+│   ├── pages.json          # 页面路由配置
+│   ├── manifest.json        # 应用配置
+│   ├── package.json
+│   └── vite.config.js
 │
-└── docs/
-    └── README.md
+├── web/                    # Web H5 版本
+│   ├── src/
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
+└── docs/                   # 文档目录
+    ├── DEPLOY.md           # 部署文档
+    └── 技术文档.md
 ```
 
 ## API接口
@@ -225,16 +375,42 @@ qingtu-ai-assistant/
 
 ## 数据库表
 
-- `user` - 用户表
-- `user_health` - 健康档案表
-- `canteen_dish` - 食堂菜品表
-- `cost_record` - 消费记录表
-- `course_schedule` - 课程表
-- `course_key_point` - AI笔记表
-- `sys_task_config` - 定时任务配置表
-- `rag_knowledge` - 知识库文档表
-- `user_skill_config` - 用户技能配置表
-- `sys_notification` - 消息通知表
+### 核心业务表
+| 表名 | 说明 |
+|------|------|
+| `user` | 用户表 |
+| `user_health` | 健康档案表 |
+| `canteen_dish` | 食堂菜品表 |
+| `cost_record` | 消费记录表 |
+| `calorie_intake` | 每日摄入热量表 |
+| `course_schedule` | 课程表 |
+| `course_key_point` | AI笔记表 |
+| `notes` | 笔记表 |
+
+### 系统表
+| 表名 | 说明 |
+|------|------|
+| `sys_notification` | 消息通知表 |
+| `sys_task_config` | 定时任务配置表 |
+| `chat_session` | AI聊天会话表 |
+| `chat_message` | AI聊天消息表 |
+
+### RAG 相关表
+| 表名 | 说明 |
+|------|------|
+| `rag_knowledge` | 知识库文档表 |
+| `conversation_log` | 对话日志表 |
+| `parse_job` | 文档解析任务表 |
+
+### MCP 相关表
+| 表名 | 说明 |
+|------|------|
+| `mcp_audit_log` | MCP调用审计日志表 |
+
+### 异步任务表
+| 表名 | 说明 |
+|------|------|
+| `async_task` | 异步任务表 |
 
 ## License
 
