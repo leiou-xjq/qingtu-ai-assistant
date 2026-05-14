@@ -8,14 +8,13 @@ import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import co.elastic.clients.elasticsearch.core.UpdateRequest;
+import co.elastic.clients.util.ObjectBuilder;
+import com.qingtu.agent.embedding.EmbeddingModel;
 import com.qingtu.agent.rag.dto.KnowledgeDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,10 +28,7 @@ public class ElasticsearchRagStore {
     private static final int EMBEDDING_DIMS = 768;
 
     private final ElasticsearchClient esClient;
-    private final RestTemplate restTemplate;
-
-    @Value("${ai.dashscope.api-key:}")
-    private String dashscopeApiKey;
+    private final EmbeddingModel embeddingModel;
 
     public void initIndex() {
         try {
@@ -90,7 +86,7 @@ public class ElasticsearchRagStore {
 
     public void addDocument(String category, String title, String content, String school, String schoolName, String source, String tags) {
         try {
-            float[] embedding = embedText(content);
+            float[] embedding = embeddingModel.embed(content);
 
             Map<String, Object> doc = new HashMap<>();
             doc.put("school", school != null ? school : "");
@@ -121,6 +117,46 @@ public class ElasticsearchRagStore {
         }
     }
 
+    public void upsertDocument(String category, String title, String content, String school, String schoolName, String source, String tags) {
+        try {
+            String docId = generateDocId(school, category, title);
+            float[] embedding = embeddingModel.embed(content);
+
+            Map<String, Object> doc = new HashMap<>();
+            doc.put("school", school != null ? school : "");
+            doc.put("schoolName", schoolName != null ? schoolName : "");
+            doc.put("category", category != null ? category : "");
+            doc.put("title", title != null ? title : "");
+            doc.put("question", title != null ? title : "");
+            doc.put("answer", content);
+            doc.put("content", content);
+            doc.put("source", source != null ? source : "");
+            doc.put("tags", tags != null ? tags : "");
+            doc.put("updatedAt", new Date());
+
+            if (embedding != null) {
+                doc.put("embedding", embedding);
+            }
+
+            esClient.update(UpdateRequest.of(u -> u
+                .index(INDEX_NAME)
+                .id(docId)
+                .doc(doc)
+                .docAsUpsert(true)
+            ), Object.class);
+
+            log.debug("ES文档upsert完成: {} - {}, docId={}", schoolName, title, docId);
+
+        } catch (Exception e) {
+            log.error("ES文档upsert失败: {}", e.getMessage(), e);
+        }
+    }
+
+    private String generateDocId(String school, String category, String title) {
+        String combined = (school != null ? school : "") + "|" + (category != null ? category : "") + "|" + (title != null ? title : "");
+        return Integer.toHexString(combined.hashCode());
+    }
+
     public List<Map<String, Object>> searchByKeyword(String keyword, int topK) {
         return vectorSearch(keyword, null, topK);
     }
@@ -148,7 +184,7 @@ public class ElasticsearchRagStore {
     }
 
     private List<Map<String, Object>> knnSearch(String query, String school, int topK) {
-        float[] embedding = embedText(query);
+        float[] embedding = embeddingModel.embed(query);
         if (embedding == null) {
             throw new RuntimeException("Embedding生成失败，无法执行向量检索");
         }
@@ -278,45 +314,6 @@ public class ElasticsearchRagStore {
             log.error("ES统计失败: {}", e.getMessage());
             return 0;
         }
-    }
-
-    public float[] embedText(String text) {
-        if (text == null || text.isBlank() || dashscopeApiKey == null || dashscopeApiKey.isBlank()) {
-            return null;
-        }
-
-        try {
-            String url = "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding";
-
-            Map<String, Object> body = new HashMap<>();
-            body.put("model", "text-embedding-v1");
-            body.put("input", Map.of("texts", List.of(text)));
-
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.set("Authorization", "Bearer " + dashscopeApiKey);
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-
-            var entity = new org.springframework.http.HttpEntity<>(body, headers);
-            String response = restTemplate.postForObject(url, entity, String.class);
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(response);
-            JsonNode embeddings = root.path("output").path("embeddings");
-
-            if (embeddings.isArray() && embeddings.size() > 0) {
-                JsonNode vec = embeddings.get(0).path("embedding");
-                if (vec.isArray()) {
-                    float[] result = new float[vec.size()];
-                    for (int i = 0; i < vec.size(); i++) {
-                        result[i] = (float) vec.get(i).asDouble();
-                    }
-                    return result;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Embedding生成失败: {}", e.getMessage());
-        }
-        return null;
     }
 
     public void clearAll() {
