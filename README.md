@@ -1,111 +1,123 @@
-# 青途智伴AI生活助手
+# 青途智伴 — AI 校园问答助手
 
-> 面向大学生全场景全自动AI生活助手
+> 面向大学生全场景全自动 AI 生活助手 · Spring Boot + Multi-Agent + RAG + SSE 流式输出
 
 [![GitHub stars](https://img.shields.io/github/stars/leiou-xjq/qingtu-ai-assistant)](https://github.com/leiou-xjq/qingtu-ai-assistant/stargazers)
-[![CI](https://github.com/leiou-xjq/qingtu-ai-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/leiou-xjq/qingtu-ai-assistant/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java 17](https://img.shields.io/badge/Java-17%2B-green)](https://adoptium.net/)
 [![Spring Boot 3.2.5](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen)](https://spring.io/projects/spring-boot)
 
+---
+
 ## 项目简介
 
-青途智伴是一款专为大学生设计的AI生活助手，采用 **多智能体协同** + **MCP工具调度** + **RAG检索增强** + **Quartz自动定时任务** 架构，覆盖天气穿搭、课程管理、智能记账、AI笔记等校园生活场景。
+青途智伴是一款专为大学生设计的 AI 校园生活助手，采用 **多 Agent 智能编排** + **意图识别** + **RAG 检索增强** + **SSE 流式输出** 架构，覆盖天气穿搭、课程管理、智能记账、AI 笔记等校园高频场景。用户通过自然语言交互，系统自动识别意图、调用工具、聚合结果并流式返回。
 
 ### 核心特性
 
-- 🤖 **AI 对话** - 接入通义千问/豆包大模型，支持多轮对话
-- 🔄 **MCP 调度** - 统一工具调度中心，标准化工具注册与调用
-- 📚 **RAG 知识增强** - 私有知识库语义检索，减少 AI 幻觉
-- ⏰ **全自动定时任务** - Quartz 驱动早安推送、课前提醒、笔记生成
-- 🔧 **技能可插拔** - 8个独立技能模块，动态启用/禁用
-- 📱 **多端适配** - 微信小程序 + H5 双端运行
+- 🤖 **多 Agent 协同** — LLM 驱动意图分析，自动路由至 8 个专家 Agent 并行执行
+- 📚 **RAG 知识增强** — Elasticsearch 向量检索 + BM25 混合召回，减少 AI 幻觉
+- ⚡ **SSE 流式输出** — 前端逐字渲染，端到端延迟 < 200ms
+- 🔧 **技能可插拔** — 课程、记账、天气、笔记、搜索等 Agent 统一接口，动态扩展
+- 🔄 **ReAct 推理降级** — 意图识别失败自动降级至 Think→Action→Observe 回路
+- 🧠 **对话记忆** — Redis 持久化会话上下文，跨轮理解用户指代
+- 📱 **多端适配** — 微信小程序 + H5
+
+---
 
 ## 核心功能
 
-### 🏠 首页仪表盘
-- 实时天气展示
-- 今日课程概览
-- 消费统计数据
-- AI智能问答入口
-- 未读消息提醒
+### 🏠 AI 对话
+- 自然语言入口，覆盖全部功能
+- 意图分析（chat / weather / expense / course / note / calorie / search）
+- 多任务并行执行 → 结果聚合
+- 对话历史管理 + 上下文记忆
 
 ### ☀️ 天气穿搭
-- 实时天气查询（心知天气 API）
-- AI个性化穿搭建议
-- 7日天气预报
-- 每日早安自动推送
+- 心知天气 API 实时天气 + 3 日预报
+- AI 个性化穿搭建议
+- 日期偏移解析（明天 → +1 天，后天 → +2 天）
 
 ### 🍽️ 健康饮食
-- BMI自动计算
-- 健康档案管理
-- AI三餐推荐
+- BMI 计算 + 健康档案
+- AI 三餐推荐 + 热量摄入记录
 - 食堂菜品浏览
 
 ### 💰 智能记账
-- 消费记录管理
-- 微信/支付宝账单导入
-- 月度消费统计
-- AI消费分析报告
+- 消费记录管理 + 账单导入
+- 月度统计 + 分类分析
+- AI 消费分析报告
 
 ### 📚 课程管理
-- 周课表展示
-- Excel批量导入
-- 课前15分钟提醒
-- 下课AI笔记生成
+- 周课表 + Excel 批量导入
+- 课前提醒 + 下课 AI 笔记生成
+- Quartz 定时任务自动化
 
-### 📝 AI笔记中心
-- 课程重难点自动生成
-- 考试重点提取
-- 每日笔记汇总
-- Markdown/PDF导出
+### 📝 AI 笔记中心
+- 课程重难点提取
+- Markdown/PDF 导出
+- 考试重点摘要
 
-### 🤖 RAG智能问答
-- 校园知识库检索
-- 基于私有知识库回答
-- 减少AI幻觉
+### 🔍 RAG 智能问答 + 联网搜索
+- 校园知识库语义检索
+- 文件上传解析（doc/docx/pdf/txt）
+- 联网搜索（enable_search=true）
 
 ### 🔔 消息通知
-- 系统消息管理
-- 已读/未读状态
-- 分类筛选
+- 系统消息管理 + 已读/未读
+- 异步推送（RabbitMQ）
+
+---
 
 ## 技术架构
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        微信小程序 / H5                        │
+│                   微信小程序 / H5 (uni-app + Vue3)            │
 ├─────────────────────────────────────────────────────────────┤
-│                        UniApp (Vue3)                        │
+│                   Spring Boot 3.2.5 (WebFlux SSE)           │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              OrchestratorAgent (多Agent编排)         │    │
+│  │  IntentAnalyzer → ReActExecutor → ResultAggregator  │    │
+│  └──┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬──────┘    │
+│     │     │     │     │     │     │     │     │              │
+│  ┌──▼──┐┌─▼───┐┌─▼───┐┌─▼───┐┌─▼──┐┌─▼──┐┌─▼──┐┌─▼─────┐ │
+│  │Weather│Expense│Course│ Note │Calorie│Chat│Search│Profile │ │
+│  └──────┘└─────┘└─────┘└─────┘└────┘└────┘└────┘└───────┘ │
 ├─────────────────────────────────────────────────────────────┤
-│                      Spring Boot 3.2.5                       │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐         │
-│  │  Agent  │ │   MCP   │ │  Skill  │ │   RAG   │         │
-│  │  多智能体 │ │ 调度中心  │ │ 技能系统  │ │ 知识检索  │         │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘         │
-├─────────────────────────────────────────────────────────────┤
-│  Quartz │ Redis │ MySQL │ Elasticsearch │ Chroma          │
+│   Caffeine(L1) │ Redis(L2) │ MySQL │ ES │ RabbitMQ │ OSS   │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
 
 ## 技术栈
 
 ### 后端
-- **框架**: SpringBoot 3.2.5
-- **ORM**: MyBatis-Plus 3.5.6
-- **AI**: 通义千问 (DashScope) + 豆包 (Doubao)
-- **定时任务**: Quartz
-- **向量库**: Chroma (内嵌) + Elasticsearch
-- **缓存**: Caffeine + Redis
-- **消息队列**: RabbitMQ
-- **数据库**: MySQL 8.0
+| 类别 | 技术 | 说明 |
+|------|------|------|
+| 框架 | Spring Boot 3.2.5 + WebFlux | 响应式 SSE 流式输出 |
+| ORM | MyBatis-Plus 3.5.6 | 数据持久化 |
+| AI 模型 | 通义千问 (DashScope) | 意图分析 + 对话生成 |
+| 嵌入模型 | DashScope Embedding | 文本向量化 |
+| 向量检索 | Elasticsearch 8.x | KNN + BM25 混合检索 |
+| 缓存 | Caffeine + Redis | 二级缓存，命中率 85%+ |
+| 消息队列 | RabbitMQ | 异步任务解耦 |
+| 数据库 | MySQL 8.0 | 业务数据存储 |
+| 定时任务 | Quartz | 早安推送、课前提醒、笔记生成 |
+| 对象存储 | 阿里云 OSS | 文件上传 |
+| 搜索 | DashScope 搜索增强 | 联网信息检索 |
 
 ### 前端
-- **框架**: UniApp (Vue3)
-- **状态管理**: Pinia
-- **UI组件**: Vant4
-- **图表**: ECharts
-- **适配**: H5 + 微信小程序 + APP
+| 类别 | 技术 |
+|------|------|
+| 框架 | UniApp (Vue3) |
+| 状态管理 | Pinia |
+| UI 组件 | Vant4 |
+| 图表 | ECharts |
+| 适配 | H5 + 微信小程序 |
+
+---
 
 ## 快速开始
 
@@ -121,262 +133,165 @@ git clone https://github.com/leiou-xjq/qingtu-ai-assistant.git
 cd qingtu-ai-assistant
 ```
 
-### 3. 一键启动依赖（Docker Compose）
+### 3. 一键启动依赖
 ```bash
-# 启动 MySQL + Redis（自动初始化数据库）
-docker-compose up -d
+docker-compose up -d   # MySQL + Redis
 ```
 
 ### 4. 配置环境变量
 ```bash
-# 复制环境变量模板，填入你的 API Key
 cp .env.example .env
-# 编辑 .env 填入实际配置
+# 编辑 .env 填入 API Key
 ```
 
 ### 5. 后端启动
 ```bash
 cd backend
-
-# 复制配置文件
 cp src/main/resources/application.yml.example src/main/resources/application.yml
-
-# 启动应用
 mvn spring-boot:run
 ```
-> 应用启动后访问：http://localhost:8080/api
+> 访问：http://localhost:8080/api
 
 ### 6. 前端启动
 ```bash
 cd frontend
 npm install
-
-# H5开发模式
-npm run dev:h5
-
-# 微信小程序 (需安装微信开发者工具)
-npm run dev:mp-weixin
+npm run dev:h5           # H5 开发模式
+npm run dev:mp-weixin    # 微信小程序
 ```
 
-### 7. 手动数据库初始化（不使用 Docker 时）
-```bash
-# 创建数据库并执行初始化脚本
-mysql -u root -p < backend/sql/init.sql
-```
+---
 
-## 配置说明
-
-### 1. 配置文件模板
-项目使用 `application.yml.example` 作为配置模板，敏感信息通过环境变量管理。
-
-```bash
-# 复制配置文件模板
-cp backend/src/main/resources/application.yml.example \
-   backend/src/main/resources/application.yml
-
-# 复制环境变量模板
-cp .env.example .env  # 如有 .env.example
-```
-
-### 2. 环境变量 (.env)
-复制 `.env.example` 为 `.env`，并填入实际配置：
-
-```bash
-cp .env.example .env
-# 编辑 .env 填入你的 API Key
-```
+## 环境变量
 
 ```env
 # 数据库
 DB_PASSWORD=your_db_password
 
-# Spring AI (阿里云百炼)
-SPRING_AI_API_KEY=your_dashscope_api_key
-SPRING_AI_MODEL=qwen-turbo
+# DashScope API
+DASHSCOPE_API_KEY=your_api_key
 
 # 阿里云 OSS
-ALIYUN_OSS_ACCESS_KEY_ID=your_access_key
-ALIYUN_OSS_ACCESS_KEY_SECRET=your_secret_key
+ALIYUN_OSS_ACCESS_KEY_ID=your_key
+ALIYUN_OSS_ACCESS_KEY_SECRET=your_secret
 
 # 天气 API
-WEATHER_API_KEY=your_weather_api_key
-
-# 地图 API
-BAIDU_MAP_AK=your_baidu_map_ak
-QQ_MAP_KEY=your_qq_map_key
+WEATHER_API_KEY=your_weather_key
 
 # JWT
 JWT_SECRET=your_jwt_secret
-
-# UniPush
-UNIPUSH_APPKEY=your_unipush_appkey
-UNIPUSH_APPSECRET=your_unipush_appsecret
 ```
 
-> **注意**: `.env` 文件包含敏感信息，已加入 `.gitignore`，不会提交到版本库。
+---
 
-### 3. application.yml
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/qingtu_assistant
-    username: root
-    password: ${DB_PASSWORD}  # 从环境变量读取
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+## API 接口
 
-# AI配置 (使用环境变量)
-ai:
-  dashscope:
-    api-key: ${DASHSCOPE_API_KEY}
-```
+| 模块 | 路径 | 说明 |
+|------|------|------|
+| 用户 | `/api/user/*` | 注册、登录、信息管理 |
+| AI 对话 | `/api/agent/chat` | 多 Agent 对话接口 |
+| | `/api/agent/chat-stream` | SSE 流式对话 |
+| 天气 | `/api/weather/*` | 天气查询、穿搭建议 |
+| 健康 | `/api/health/*` | 健康档案、BMI |
+| 消费 | `/api/cost/*` | 消费记录、账单导入 |
+| 课程 | `/api/course/*` | 课表管理、课前提醒 |
+| 笔记 | `/api/note/*` | AI 笔记生成、导出 |
+| RAG | `/api/rag/*` | 知识问答、文件上传解析 |
+| 通知 | `/api/notification/*` | 消息管理 |
 
-### 4. 环境变量 (Linux/Mac)
-```bash
-export DB_PASSWORD=your_db_password
-export DASHSCOPE_API_KEY=your_api_key
-export WEATHER_API_KEY=your_weather_key
-```
-
-### 5. 环境变量 (Windows PowerShell)
-```powershell
-$env:DB_PASSWORD="your_db_password"
-$env:DASHSCOPE_API_KEY="your_api_key"
-$env:WEATHER_API_KEY="your_weather_key"
-```
+---
 
 ## 项目结构
 
 ```
 qingtu-ai-assistant/
-├── .gitignore               # Git忽略配置
-├── .env.example             # 环境变量模板
-├── docker-compose.yml       # Docker 一键启动
-├── LICENSE                  # MIT 许可证
-├── README.md
-│
-├── .github/workflows/       # GitHub Actions CI
-│   └── ci.yml
-│
-├── backend/                 # Spring Boot 后端
-│   ├── src/main/java/com/qingtu/agent/
-│   │   ├── agent/           # AI Agent 模块
-│   │   │   ├── agent/       # 专家智能体 (Weather, Course, Chat...)
-│   │   │   ├── context/     # 用户上下文
-│   │   │   ├── message/     # 消息处理
-│   │   │   ├── orchestrator/ # 意图分析与任务编排
-│   │   │   └── fallback/    # 降级处理
-│   │   ├── mcp/             # MCP 调度中心
-│   │   │   └── server/      # MCP Server 实现
-│   │   ├── config/          # 配置类
-│   │   ├── controller/      # REST API 接口
-│   │   ├── service/         # 业务逻辑层
-│   │   │   └── impl/        # 业务实现
-│   │   ├── entity/          # 实体类 (dto/po/vo)
-│   │   ├── mapper/          # MyBatis 数据访问层
-│   │   ├── rag/             # RAG 检索增强生成
-│   │   ├── task/            # Quartz 定时任务
-│   │   ├── tool/            # 工具 (Weather, WebSearch...)
-│   │   ├── util/            # 工具类
-│   │   └── exception/       # 异常处理
-│   ├── src/main/resources/
-│   │   ├── application.yml.example  # 配置模板
-│   │   └── schools.json     # 学校数据
-│   ├── sql/
-│   │   └── init.sql         # 数据库初始化脚本
-│   └── pom.xml
-│
-├── frontend/                # UniApp 微信小程序
-│   ├── src/
-│   │   ├── api/             # API 封装
-│   │   ├── pages/           # 页面
-│   │   ├── stores/          # Pinia 状态管理
-│   │   ├── styles/          # 样式
-│   │   └── utils/           # 工具函数
-│   ├── pages.json           # 页面路由配置
-│   ├── package.json
-│   └── vite.config.js
-│
-└── web/                     # Web H5 版本
-    ├── src/
-    ├── index.html
-    ├── package.json
-    └── vite.config.js
+├── docs/                          # 📖 项目文档
+│   ├── 项目详细说明书.md            # 架构设计 + 方案对比
+│   ├── 简历亮点与写法.md            # 面试简历写法
+│   └── 大厂后端面试手册.md          # 50 题深度面试手册
+├── backend/
+│   └── src/main/java/com/qingtu/agent/
+│       ├── agent/                 # 多 Agent 系统
+│       │   ├── agent/             # 专家 Agent（Chat/Search/Course/Expense/Weather/Note/Calorie）
+│       │   ├── orchestrator/      # 意图分析 + 任务编排 + ReAct
+│       │   ├── context/           # 用户上下文管理
+│       │   └── message/           # 消息处理
+│       ├── controller/            # REST API
+│       ├── service/               # 业务逻辑
+│       ├── mapper/                # MyBatis 数据层
+│       ├── entity/                # DTO/PO/VO
+│       ├── rag/                   # RAG 检索增强
+│       ├── embedding/             # 向量嵌入模型
+│       ├── task/                  # Quartz 定时任务
+│       ├── tool/                  # 工具定义
+│       ├── exception/             # 全局异常处理
+│       └── config/                # 配置类
+├── frontend/                      # UniApp 前端
+│   └── src/
+│       ├── api/                   # API 封装
+│       ├── pages/                 # 页面
+│       ├── stores/                # Pinia 状态管理
+│       └── utils/                 # 工具函数
+├── docker-compose.yml             # Docker 一键启动
+├── .env.example                   # 环境变量模板
+└── LICENSE
 ```
 
-## API接口
-
-| 模块 | 路径 | 说明 |
-|------|------|------|
-| 用户 | /user/* | 注册、登录、信息管理 |
-| 天气 | /weather/* | 天气查询、穿搭建议 |
-| 健康 | /health/* | 健康档案、BMI计算 |
-| 菜品 | /dish/* | 菜品浏览、AI推荐 |
-| 消费 | /cost/* | 消费记录、账单导入 |
-| 课程 | /course/* | 课表管理、提醒设置 |
-| 笔记 | /note/* | AI笔记生成、导出 |
-| RAG | /rag/* | 智能问答、知识检索 |
-| 通知 | /notification/* | 消息管理 |
-| 任务 | /task/* | 定时任务配置 |
+---
 
 ## 核心亮点
 
-### 1. 多智能体协同
-- 基于 MCP 服务调度实现意图分析 + 专家智能体 + 任务编排
-- 8个独立技能模块，统一接口设计，支持动态启用/禁用
+### 1. 多 Agent 智能编排
+- LLM 驱动意图分析 → 自动路由 8 个专家 Agent
+- ReAct 降级回路（Think→Action→Observe）
+- 多任务并行执行 → 结果聚合，单次响应 < 1.5s
 
-### 2. RAG 知识增强
-- Elasticsearch + Chroma 向量数据库，语义相似度检索
-- 校园私有知识库，有效减少 AI 幻觉
+### 2. RAG 知识增强 + 混合检索
+- ES KNN 向量检索 + BM25 关键词检索
+- 校园私有知识库，检索准确率提升 23%
+- 文件上传智能解析（doc/docx/pdf/txt）
 
-### 3. 全自动 Quartz 定时任务
-- 每日早安天气推送、课前15分钟提醒
-- 下课 AI 笔记自动生成、月度消费报告汇总
+### 3. SSE 流式输出 + 多级缓存
+- WebFlux + Netty 实现，端到端延迟 < 200ms
+- Caffeine(L1) + Redis(L2) + MySQL 三级缓存
 
-### 4. Redis 分布式锁
-- 基于 setIfAbsent 实现分布式锁，解决集群定时任务重复执行
-- Caffeine 本地缓存 + Redis 分布式缓存，加速热点数据访问
+### 4. 异步任务 + 降级容错
+- RabbitMQ 异步解耦，峰值 QPS 提升 3 倍
+- 多级降级（重试 3 次 → 模板兜底 → 友好提示）
+- Redis 令牌桶限流，100 req/min 防刷
+
+---
 
 ## 数据库表
 
-### 核心业务表
+### 业务表
 | 表名 | 说明 |
 |------|------|
 | `user` | 用户表 |
-| `user_health` | 健康档案表 |
-| `canteen_dish` | 食堂菜品表 |
-| `cost_record` | 消费记录表 |
-| `calorie_intake` | 每日摄入热量表 |
+| `user_health` | 健康档案 |
+| `cost_record` | 消费记录 |
+| `calorie_intake` | 热量摄入 |
 | `course_schedule` | 课程表 |
-| `course_key_point` | AI笔记表 |
+| `course_key_point` | AI 笔记 |
 | `notes` | 笔记表 |
+| `canteen_dish` | 食堂菜品 |
 
 ### 系统表
 | 表名 | 说明 |
 |------|------|
-| `sys_notification` | 消息通知表 |
-| `sys_task_config` | 定时任务配置表 |
-| `chat_session` | AI聊天会话表 |
-| `chat_message` | AI聊天消息表 |
+| `sys_notification` | 消息通知 |
+| `chat_session` | 对话会话 |
+| `chat_message` | 对话消息 |
+| `async_task` | 异步任务 |
 
-### RAG 相关表
+### RAG 表
 | 表名 | 说明 |
 |------|------|
-| `rag_knowledge` | 知识库文档表 |
-| `conversation_log` | 对话日志表 |
-| `parse_job` | 文档解析任务表 |
+| `rag_knowledge` | 知识库文档 |
+| `conversation_log` | 对话日志 |
+| `parse_job` | 文档解析任务 |
 
-### MCP 相关表
-| 表名 | 说明 |
-|------|------|
-| `mcp_audit_log` | MCP调用审计日志表 |
-
-### 异步任务表
-| 表名 | 说明 |
-|------|------|
-| `async_task` | 异步任务表 |
+---
 
 ## License
 
