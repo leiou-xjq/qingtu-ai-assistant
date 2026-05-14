@@ -226,7 +226,10 @@ public List<Map<String, Object>> getToolDefinitions() {
     }
 
     private boolean hasPermission(Long userId, ToolPermission required) {
-        return required == ToolPermission.USER || required == ToolPermission.PUBLIC;
+        if (required == ToolPermission.PUBLIC) {
+            return true;
+        }
+        return userId != null;
     }
 
     private static class ToolHandlerData {

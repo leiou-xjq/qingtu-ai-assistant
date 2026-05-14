@@ -182,14 +182,27 @@ public class ElasticsearchRagStore {
             SearchResponse<Map> response = esClient.search(builder.build(), Map.class);
 
             List<Map<String, Object>> results = new ArrayList<>();
+            int filteredCount = 0;
             for (Hit<Map> hit : response.hits().hits()) {
                 if (hit.source() != null) {
-                    results.add(hit.source());
+                    Double score = hit.score();
+                    if (score != null && score >= 0.5) {
+                        Map<String, Object> source = hit.source();
+                        source.put("_score", score);
+                        results.add(source);
+                    } else if (score != null) {
+                        filteredCount++;
+                    }
                 }
             }
 
-            log.debug("向量检索完成: query={}, school={}, topK={}, results={}",
-                query, school, topK, results.size());
+            if (filteredCount > 0) {
+                log.debug("向量检索过滤: query={}, school={}, minScore=0.5, 过滤低分结果数={}, 保留结果数={}",
+                    query, school, filteredCount, results.size());
+            } else {
+                log.debug("向量检索完成: query={}, school={}, topK={}, results={}",
+                    query, school, topK, results.size());
+            }
             return results;
 
         } catch (Exception e) {
